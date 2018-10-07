@@ -19,19 +19,19 @@ void padMessage(string File)
 {
 	int fileLen = File.length();			// Get the length of the text file. 
 	int remainder = fileLen % 16;			// This 128 bit encryption requires 16 byte blocks
-	int pad;								// Integer that will populate the padding
+	int pad;					// Integer that will populate the padding
 
-	string *paddedmsg;						// Dynamic string that will house the contents of the file plus the padding
-	ofstream myfile;						// output of the file for testing purposes
+	string *paddedmsg;				// Dynamic string that will house the contents of the file plus the padding
+	ofstream myfile;				// output of the file for testing purposes
 	myfile.open("testpad.txt");
 	if (remainder == 0) {
 
-		cout << "True";						// test that if the file is  multiple of 16 code will do nothing
+		cout << "True";				// test that if the file is  multiple of 16 code will do nothing
 
 	}
 	else {
 
-		pad = 16 - remainder;;				// determine size and content
+		pad = 16 - remainder;;			// determine size and content
 		int padmsglen = fileLen + pad;		// of the padding
 
 		paddedmsg = new string[padmsglen];	// Dynamically allocate size of the new string
@@ -71,7 +71,7 @@ void ShiftRows(string File) {
 		placeHolder[i] = File[i + 1];
 	}
 
-	placeHolder[7] = File[4];			// row 1: 1st elements shifts all the way right
+	placeHolder[7] = File[4];		// row 1: 1st elements shifts all the way right
 
 
 	for (int i = 8; i < 10; i++) {		// row 2: 1st 2 elements shift left 2nd two shift right
@@ -83,20 +83,19 @@ void ShiftRows(string File) {
 		placeHolder[i] = File[i - 2];
 	}
 
-	placeHolder[12] = File[15];			// row 3: first 3 elements shift right this sets the last element to the 12th position to make room
+	placeHolder[12] = File[15];		// row 3: first 3 elements shift right this sets the last element to the 12th position to make room
 
 	for (int i = 13; i < 16; i++) {
 
 		placeHolder[i] = File[i + 1];
 	}
 
-	for (int i = 0; i < 16; i++) {		// repopulate File with the 
+	for (int i = 0; i < 16; i++) {		// repopulate File with the shifted array
 
 		File[i] = placeHolder[i].c_str;
 	}
 }
 void MixColumns() {}
-
 void AddRoundKey() {}
 void aesEncrypt(string File) 
 {
@@ -116,7 +115,6 @@ void aesEncrypt(string File)
 		}
 	}
 }
-void aesDecrypt() {}
 
 int main()
 {
