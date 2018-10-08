@@ -97,6 +97,61 @@ void ShiftRows(string File) {
 }
 void MixColumns() {}
 void AddRoundKey() {}
+void KeyExpansion (string Password) //Generates all keys that will be used and stores them into an array.
+{
+	for (int i = 0; i < 16; i++) //store first 16 bytes into the beginning of the expanded key array
+	{
+		GeneratedKeys[i] = Password[i];
+	}
+
+	
+	int NrGenKeys = 1; //used as control variable in loop to ensure we don't generate more than the 11 needed
+	int NrGenBytes = 16; //used to count number of bytes, 16  bytes denotes generation of 1 key. Initialized to 16 to 
+	char tmp[4];
+	int count; //Used to check which rcon value needs to be used
+
+
+	for(NrGenKeys;  NrGenKeys<11; NrGenKeys++)
+	{
+		//takes chunk of previously generated key to be used for generation of new key
+		for (int i = 0; i < 4; i++)
+		{
+			tmp[i] = GeneratedKeys[i + (NrGenBytes) - 4];
+		}
+
+		if (NrGenBytes%16==0) //This denotes a new key has been made, then takes chunk of recently made key
+		{
+			RotWord(tmp,count);
+			count += 1;
+			NrGenKeys += 1;
+		}
+
+		for(char a=0; a < 4; a++)
+		{
+			GeneratedKeys[NrGenBytes] = GeneratedKeys[NrGenBytes - 16] ^ tmp[a];
+			NrGenBytes++;
+		}
+	}
+	
+
+}
+void RotWord(string tmp, int count)
+{
+	char start;
+	start = tmp[0];
+	tmp[1] = tmp[2];
+	tmp[2] = tmp[3];
+	tmp[3] = start;
+
+	tmp[3] = s_box[tmp[3]];
+	tmp[2] = s_box[tmp[2]];
+	tmp[1] = s_box[tmp[1]];
+	tmp[0] = s_box[tmp[0]];
+
+	tmp[0] ^= rcon[count];
+
+
+}
 void aesEncrypt(string File) 
 {
 
