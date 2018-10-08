@@ -58,7 +58,10 @@ void padMessage(string File)
 	myfile.close();
 }
 
-void SubBytes(){}
+void SubBytes(string state)
+{
+state[i] = s_box[state[i]];
+}
 void ShiftRows(string File) {
 	string placeHolder[16];
 
