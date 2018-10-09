@@ -11,7 +11,7 @@ Date:          September 2018
 #include <iostream>
 #include <fstream>
 #include <string>
-//#include "AES.h"
+#include "AES.h"
 
 using namespace std;
 
