@@ -74,7 +74,35 @@ void ShiftRows(string* File,string block[]) {
 		File[i] = placeHolder[i].c_str;
 	}
 }
-void MixColumns() {}
+void MixColumns() {
+	char hold[16];
+
+	hold[0] = (2* state[0]) ^ (state[1] * 3) ^ (state[2]) ^ (state[3]);
+	hold[1] = state[0] ^ (state[1] * 2) ^ (state[2] * 3) ^ (state[3]);
+	hold[2] = (state[0]) ^ (state[1]) ^ (state[2] * 2) ^ (state[3] * 3);
+	hold[3] = (state[0] * 3) ^ (state[1]) ^ (state[2]) ^ (state[3] * 2);
+
+	hold[4] = (state[4] * 2) ^ (state[5] * 3) ^ (state[6]) ^ (state[7]);
+	hold[5] = state[4] ^ (state[5] * 2) ^ (state[6] * 3) ^ (state[7]);
+	hold[6] = (state[4]) ^ (state[5]) ^ (state[6] * 2) ^ (state[7] * 3);
+	hold[7] = (state[4] * 3) ^ (state[5]) ^ (state[6]) ^ (state[7] * 2);
+
+	hold[8] = (2 * state[8]) ^ (state[9] * 3) ^ (state[10]) ^ (state[11]);
+	hold[9] = state[8] ^ (state[9] * 2) ^ (state[10] * 3) ^ (state[11]);
+	hold[10] = (state[8]) ^ (state[9]) ^ (state[10] * 2) ^ (state[11] * 3);
+	hold[11] = (state[8] * 3) ^ (state[9]) ^ (state[10]) ^ (state[11] * 2);
+
+	hold[12] = (state[12] * 2) ^ (state[13] * 3) ^ (state[14]) ^ (state[15]);
+	hold[13] = state[12] ^ (state[13] * 2) ^ (state[14] * 3) ^ (state[15]);
+	hold[14] = (state[12]) ^ (state[13]) ^ (state[14] * 2) ^ (state[15] * 3);
+	hold[15] = (state[12] * 3) ^ (state[13]) ^ (state[14]) ^ (state[15] * 2);
+
+	for (int i = 0; i < 16; i++) {
+
+		state[i] = hold[i];
+	}
+
+}
 void AddRoundKey() {}
 void KeyExpansion(string Password) //Generates all keys that will be used and stores them into an array.
 {
