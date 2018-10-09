@@ -15,6 +15,22 @@ Date:          September 2018
 
 using namespace std;
 
+void writetoFile(string block[])
+{
+	ofstream myfile;						// output of the file for testing purposes
+	myfile.open("encryptedfile.txt");
+	if (!myfile) {
+		cout << " Unable to open file." << endl;
+		exit(1);
+	}
+	for (int j = 0; j < 16; j++) {
+
+		myfile << block[j];
+
+	}
+
+	myfile.close;
+}
 void SubBytes(){
 	for (int k = 0; k < 16; k++)
 	{
