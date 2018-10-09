@@ -111,27 +111,32 @@ void aesEncrypt(string GlobalFile[], string *paddedmsg, int repeat)
 	int start;
 
 	for (int i = 0; i < repeat; i++) {
-		for (int j = 0; j < 16; j++) {
-			
-			block[j] = paddedmsg[];
+
+		start = 16 * i;
+
+		for (int j = start; j < start + 16; j++) {
+
+			block[j] = paddedmsg[j];
 		}
-	}
+
 
 		for (int rounds = 0; rounds < 10; rounds++)
 		{
 
 			if (rounds < 9) {
-				SubBytes();
-				ShiftRows(File, block);
+				SubBytes(block);
+				ShiftRows(block);
 				MixColumns();
 				AddRoundKey();
 			}
 			if (rounds == 9) {
-				SubBytes();
-				ShiftRows(File, block);
+				SubBytes(block);
+				ShiftRows(block);
 				AddRoundKey();
 			}
 		}
+		writetoFile(block);
+	}
 }
 int padMessage(string File, string * paddedmsg)
 {
