@@ -1,12 +1,3 @@
-/**************************************************************
-File:          Main.cc
-Description:
-Authors:       Daniel Gutierrez, Pedro Garcia
-Class:         Security In Computing
-Date:          September 2018
-***************************************************************/
-
-
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -15,7 +6,7 @@ Date:          September 2018
 
 using namespace std;
 
-void writetoFile(string block[])
+void writetoFile(char block[])
 {
 	ofstream myfile;						// output of the file for testing purposes
 	myfile.open("encryptedfile.txt");
@@ -31,15 +22,16 @@ void writetoFile(string block[])
 
 	myfile.close;
 }
-void SubBytes(){
+void SubBytes(char state[]){
+
 	for (int k = 0; k < 16; k++)
 	{
 		state[k] = s_box[state[k]];
 	}
 		
 }
-void ShiftRows(string* File,string block[]) {
-	string placeHolder[16];
+void ShiftRows(char File[]) {
+	char placeHolder[16];
 
 	for (int i = 0; i < 4; i++) {		// row 0: no elements shift place
 		
@@ -71,10 +63,11 @@ void ShiftRows(string* File,string block[]) {
 
 	for (int i = 0; i < 16; i++) {		// repopulate File with the 
 
-		File[i] = placeHolder[i].c_str;
+		File[i] = placeHolder[i];
 	}
 }
-void MixColumns() {
+void MixColumns(char state[]) {
+
 	char hold[16];
 
 	hold[0] = (2* state[0]) ^ (state[1] * 3) ^ (state[2]) ^ (state[3]);
@@ -103,7 +96,12 @@ void MixColumns() {
 	}
 
 }
-void AddRoundKey() {}
+void AddRoundKey(char state[]) {
+	for (int i = 0; i < 16; i++)
+	{
+		state[i] ^= GeneratedKeys[i];
+	}
+}
 void KeyExpansion(string Password) //Generates all keys that will be used and stores them into an array.
 {
 	for (int i = 0; i < 16; i++) //store first 16 bytes into the beginning of the expanded key array
@@ -149,9 +147,9 @@ void RotWord(string tmp, int count)
 	tmp[0] = s_box[tmp[0]];
 	tmp[0] ^= rcon[count];
 }
-void aesEncrypt(string GlobalFile[], string *paddedmsg, int repeat) 
+void aesEncrypt(string GlobalFile[], char *paddedmsg, int repeat) 
 {
-	string block[16];
+	char block[16];
 	int start;
 
 	for (int i = 0; i < repeat; i++) {
@@ -170,19 +168,20 @@ void aesEncrypt(string GlobalFile[], string *paddedmsg, int repeat)
 			if (rounds < 9) {
 				SubBytes(block);
 				ShiftRows(block);
-				MixColumns();
-				AddRoundKey();
+				MixColumns(block);
+				AddRoundKey(block);
 			}
 			if (rounds == 9) {
 				SubBytes(block);
 				ShiftRows(block);
-				AddRoundKey();
+				AddRoundKey(block);
 			}
 		}
 		writetoFile(block);
 	}
 }
-int padMessage(string File, string * paddedmsg)
+
+int padMessage(string File, char * paddedmsg)
 {
 	int fileLen = File.length();			// Get the length of the text file. 
 	int remainder = fileLen % 16;			// This 128 bit encryption requires 16 byte blocks
@@ -202,7 +201,7 @@ int padMessage(string File, string * paddedmsg)
 		pad = 16 - remainder;;				// determine size and content
 		padmsglen = fileLen + pad;		// of the padding
 
-		paddedmsg = new string[padmsglen];	// Dynamically allocate size of the new string
+		paddedmsg = new char[padmsglen];	// Dynamically allocate size of the new string
 
 		for (int i = 0; i < fileLen; i++) {	// copy contents
 
@@ -231,7 +230,7 @@ int main()
 	string FileName;
 	string FileContents;
 	string globalFile[2048];
-	string *paddedmsg;
+	char * paddedmsg;
 	int repeat;
 
 	cout << "Enter the name of the file to be read..." << endl;
