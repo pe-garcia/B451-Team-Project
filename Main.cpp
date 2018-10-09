@@ -15,7 +15,13 @@ Date:          September 2018
 
 using namespace std;
 
-void SubBytes(){}
+void SubBytes(){
+	for (int k = 0; k < 16; k++)
+	{
+		state[k] = s_box[state[k]];
+	}
+		
+}
 void ShiftRows(string* File,string block[]) {
 	string placeHolder[16];
 
