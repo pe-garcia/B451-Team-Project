@@ -31,39 +31,31 @@ void SubBytes(char state[]){
 		
 }
 void ShiftRows(char File[]) {
-	char placeHolder[16];
+	char hold[16];
+	
+	hold[0] = state[0];
+	hold[1] = state[5];
+	hold[2] = state[10];
+	hold[3] = state[15];
 
-	for (int i = 0; i < 4; i++) {		// row 0: no elements shift place
-		
-		placeHolder[i] = File[i];
-	}
-	for (int i = 4; i < 7; i++) {		// row 1: elements 5,6,7 shift left so element 4 can shift right
+	hold[4] = state[4];
+	hold[5] = state[9];
+	hold[6] = state[14];
+	hold[7] = state[3];
 
-		placeHolder[i] = File[i + 1];
-	}
+	hold[8] = state[8];
+	hold[9] = state[13];
+	hold[10] = state[2];
+	hold[11] = state[7];
 
-	placeHolder[7] = File[4];			// row 1: 1st elements shifts all the way right
-
-
-	for (int i = 8; i < 10; i++) {		// row 2: 1st 2 elements shift left 2nd two shift right
-
-		placeHolder[i] = File[i+2];
-	}
-	for (int i = 10; i < 12; i++) {
-
-		placeHolder[i] = File[i - 2];
-	}
-
-	placeHolder[12] = File[15];			// row 3: first 3 elements shift right this sets the last element to the 12th position to make room
-
-	for (int i = 13; i < 16; i++) {
-
-		placeHolder[i] = File[i + 1];
-	}
+	hold[12] = state[12];
+	hold[13] = state[1];
+	hold[14] = state[6];
+	hold[15] = state[11];
 
 	for (int i = 0; i < 16; i++) {		// repopulate File with the 
 
-		File[i] = placeHolder[i];
+		state[i] = hold[i];
 	}
 }
 void MixColumns(char state[]) {
