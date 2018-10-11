@@ -24,8 +24,7 @@ void writetoFile(string block, int filelength)
 	}
 	for (int j = 0; j < filelength; j++) {
 
-		myfile << (int)block[j] << endl;
-
+		myfile << (int)block[j] << " ";
 	}
 
 	myfile.close();
@@ -118,16 +117,18 @@ void expHelp(string tmp, int count)
 }
 void KeyExpansion(unsigned char * GeneratedKeys, string Password) //Generates all keys that will be used and stores them into an array.
 {
+	ofstream TestFile;
+	TestFile.open("testfile.txt");
 	for (int i = 0; i < 16; i++) //store first 16 bytes into the beginning of the expanded key array
 	{
 		GeneratedKeys[i] = Password[i];
 	}
 
-	int NrGenKeys = 1; //used as control variable in loop to ensure we don't generate more than the 11 needed
+	int NrGenKeys = 0; //used as control variable in loop to ensure we don't generate more than the 11 needed
 	int NrGenBytes = 16; //used to count number of bytes, 16  bytes denotes generation of 1 key. Initialized to 16 to 
 	char tmp[4];
-	int count = 0; //Used to check which rcon value needs to be used
-	for (NrGenKeys; NrGenKeys<11; NrGenKeys++)
+	int count = 1; //Used to check which rcon value needs to be used
+	for (NrGenKeys; NrGenKeys < 10;)
 	{
 		//takes chunk of previously generated key to be used for generation of new key
 		for (int i = 0; i < 4; i++)
@@ -136,6 +137,9 @@ void KeyExpansion(unsigned char * GeneratedKeys, string Password) //Generates al
 		}
 		if (NrGenBytes % 16 == 0) //This denotes a new key has been made, then takes chunk of recently made key
 		{
+
+			TestFile << GeneratedKeys;
+	
 			expHelp(tmp, count);
 			count += 1;
 			NrGenKeys += 1;
@@ -145,7 +149,10 @@ void KeyExpansion(unsigned char * GeneratedKeys, string Password) //Generates al
 			GeneratedKeys[NrGenBytes] = GeneratedKeys[NrGenBytes - 16] ^ tmp[a];
 			NrGenBytes++;
 		}
+
+
 	}
+		TestFile.close();
 
 }
 
@@ -200,18 +207,21 @@ int main()
 	//Array to hold all generated keys, 128 bits per key
 	unsigned char GeneratedKeys[176];
 
-	string Password;
+	string Password = "Thats my Kung Fu";
 	string FileName;
 	string FileContents;
 	string globalFile;
 	string paddedmsg;
 	int repeat;
 
+	//ofstream TestFile;
+	//TestFile.open("testfile.txt");
+
 	cout << "Enter the name of the file to be read..." << endl;
 	cin >> FileName;
-	cout << "Enter the 16 character password to be used as the encryption key..." << endl;
-	cin >> Password;
-
+	//cout << "Enter the 16 character password to be used as the encryption key..." << endl;
+	//getline(cin, Password);
+	
 	ifstream MyFile;
 
 	MyFile.open(FileName);
@@ -241,6 +251,7 @@ int main()
 
 	repeat = FileContents.length()/ 16;
 	KeyExpansion(GeneratedKeys, Password);
+
 	aesEncrypt(globalFile,FileContents,repeat, GeneratedKeys);
 
 	MyFile.close();
