@@ -23,10 +23,14 @@ void writetoFile(string block, int filelength)
 		exit(1);
 	}
 	for (int j = 0; j < filelength; j++) {
+		if ((j % 16 == 0) && (j != 0)) { 			// formats the output. new line every 16 characters
+		myfile << endl;
 
+		}
 		myfile << (int)block[j] << " ";
+		
 	}
-
+	
 	myfile.close();
 }
 void SubBytes(string state){
