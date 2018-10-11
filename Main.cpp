@@ -157,6 +157,8 @@ void KeyExpansion(unsigned char * GeneratedKeys, unsigned char * Password) //Gen
 
 
 	}
+	// This is used to test that the key is properly generated
+	
 	//for (int i = 0; i < 176; i++)
 	//{
 	//	TestFile << GeneratedKeys[i];
@@ -176,16 +178,13 @@ void aesEncrypt(string GlobalFile, string paddedmsg, int repeat, unsigned char *
 
 		start = 16 * i;
 
-		//block += paddedmsg;
+
 		for (int j = start; j < start + 16; j++) {
 
 			block += paddedmsg[j];
 		}
 
 		AddRoundKey(block, key, 0);
-		//SubBytes(block);
-		//ShiftRows(block);
-		//MixColumns(block);
 
 		for (int rounds = 1; rounds < 11; rounds++)
 		{
@@ -217,20 +216,20 @@ int main()
 	//Array to hold all generated keys, 128 bits per key
 	unsigned char GeneratedKeys[176];
 
-	unsigned char Password[] = "ThisisMyPassword";
+	unsigned char Password[];
 	string FileName;
 	string FileContents;
 	string globalFile;
 	string paddedmsg;
 	int repeat;
 
-	ofstream TestFile;
-	TestFile.open("testfile.txt");
+	//ofstream TestFile;
+	//TestFile.open("testfile.txt");
 
 	cout << "Enter the name of the file to be read..." << endl;
 	cin >> FileName;
-	//cout << "Enter the 16 character password to be used as the encryption key..." << endl;
-	//getline(cin, Password);
+	cout << "Enter the 16 character password to be used as the encryption key..." << endl;
+	getline(cin, Password);
 	
 	ifstream MyFile;
 
@@ -262,7 +261,7 @@ int main()
 	repeat = FileContents.length()/ 16;
 	KeyExpansion(GeneratedKeys, Password);
 
-	TestFile << GeneratedKeys;
+	//TestFile << GeneratedKeys;
 
 	aesEncrypt(globalFile,FileContents,repeat, GeneratedKeys);
 
