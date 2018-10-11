@@ -24,7 +24,7 @@ void writetoFile(string block, int filelength)
 	}
 	for (int j = 0; j < filelength; j++) {
 		if ((j % 16 == 0) && (j != 0)) {
-		myfile << endl;
+		myfile << endl;								// format output
 
 		}
 		myfile << (int)block[j] << " ";
@@ -45,6 +45,7 @@ void SubBytes(string state){
 void ShiftRows(string state) {
 	char hold[16];
 	
+	// shift rows according to the slides
 	hold[0] = state[0];
 	hold[1] = state[5];
 	hold[2] = state[10];
@@ -65,11 +66,14 @@ void ShiftRows(string state) {
 	hold[14] = state[6];
 	hold[15] = state[11];
 
-	for (int i = 0; i < 16; i++) {		// repopulate File with the 
+	for (int i = 0; i < 16; i++) {		// repopulate File with the new contents
 
 		state[i] = hold[i];
 	}
 }
+
+// multiply the columns by the matrix given
+
 void MixColumns(string state) {
 
 	char hold[16];
@@ -172,19 +176,19 @@ void aesEncrypt(string GlobalFile, string paddedmsg, int repeat, unsigned char *
 {
 	string block;
 	int start;
-	int filelength = paddedmsg.length();
+	int filelength = paddedmsg.length();			// find the length of the big file size
 
 	for (int i = 0; i < repeat; i++) {
 
-		start = 16 * i;
+		start = 16 * i;							// the repeat size determines how many 128 bit blocks we will need to encrypt
 
 
-		for (int j = start; j < start + 16; j++) {
+		for (int j = start; j < start + 16; j++) {			// if 1 rounds start size will be 0. if 2 start size will be 16 etc etc
 
 			block += paddedmsg[j];
 		}
 
-		AddRoundKey(block, key, 0);
+		AddRoundKey(block, key, 0);							// state Xo must have addroundkey called first
 
 		for (int rounds = 1; rounds < 11; rounds++)
 		{
@@ -202,11 +206,11 @@ void aesEncrypt(string GlobalFile, string paddedmsg, int repeat, unsigned char *
 			}
 		}
 
-		GlobalFile += block;
+		GlobalFile += block;							// concat to large file
 		
-		block = "";
+		block = "";										// reset block
 	}
-	writetoFile(GlobalFile, filelength);
+	writetoFile(GlobalFile, filelength);				// write the file at the end of the 10 rounds
 
 }
 
@@ -216,7 +220,8 @@ int main()
 	//Array to hold all generated keys, 128 bits per key
 	unsigned char GeneratedKeys[176];
 
-	unsigned char Password[];
+	string temppass;
+	unsigned char * Password = {};
 	string FileName;
 	string FileContents;
 	string globalFile;
@@ -229,7 +234,11 @@ int main()
 	cout << "Enter the name of the file to be read..." << endl;
 	cin >> FileName;
 	cout << "Enter the 16 character password to be used as the encryption key..." << endl;
-	getline(cin, Password);
+	cin >> temppass;
+
+	for (int i = 0; i < temppass.length(); i++) {
+		Password[i] = temppass[i];
+	}
 	
 	ifstream MyFile;
 
@@ -242,23 +251,23 @@ int main()
 
 	getline(MyFile, FileContents, '\0');
 
-	if (FileContents.length() % 16 != 0) {
+	if (FileContents.length() % 16 != 0) {				// only do if not a multiple of 16 bytes
 		int fileLen = FileContents.length();			// Get the length of the text file. 
 		int remainder = fileLen % 16;			// This 128 bit encryption requires 16 byte blocks
 		int pad = 16 - remainder;								// Integer that will populate the padding
 		//cout << pad << endl;
-		int padmsglen = fileLen + pad;
+		int padmsglen = fileLen + pad;					// new length that will be divisible by 16
 
 		for (int i = fileLen; i < padmsglen; i++) {
 		
-			paddedmsg += pad;
+			paddedmsg += pad;						// create the pad
 		}
 
-		FileContents += paddedmsg;
+		FileContents += paddedmsg;					// add the pad the full message
 
 	}
 
-	repeat = FileContents.length()/ 16;
+	repeat = FileContents.length()/ 16;					// number of repeat = the number of 16 byte blocks in padded file
 	KeyExpansion(GeneratedKeys, Password);
 
 	//TestFile << GeneratedKeys;
