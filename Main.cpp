@@ -24,7 +24,8 @@ void writetoFile(string block, int filelength)
 	}
 	for (int j = 0; j < filelength; j++) {
 
-		myfile << block[j];
+		myfile << (int)block[j] << endl;
+
 	}
 
 	myfile.close();
@@ -95,16 +96,17 @@ void MixColumns(string state) {
 	}
 
 }
-void AddRoundKey(string state) {
+void AddRoundKey(string state, unsigned char * GeneratedKeys, int round) {
 	for (int i = 0; i < 16; i++)
 	{
-		state[i] ^= GeneratedKeys[i];
+		state[i] ^= GeneratedKeys[i+16*round];
 	}
 }
-void RotWord(string tmp, int count)
+void expHelp(string tmp, int count)
 {
 	char start;
 	start = tmp[0];
+	tmp[0] = tmp[1];
 	tmp[1] = tmp[2];
 	tmp[2] = tmp[3];
 	tmp[3] = start;
@@ -114,7 +116,7 @@ void RotWord(string tmp, int count)
 	tmp[0] = s_box[tmp[0]];
 	tmp[0] ^= rcon[count];
 }
-void KeyExpansion(string Password) //Generates all keys that will be used and stores them into an array.
+void KeyExpansion(unsigned char * GeneratedKeys, string Password) //Generates all keys that will be used and stores them into an array.
 {
 	for (int i = 0; i < 16; i++) //store first 16 bytes into the beginning of the expanded key array
 	{
@@ -134,7 +136,7 @@ void KeyExpansion(string Password) //Generates all keys that will be used and st
 		}
 		if (NrGenBytes % 16 == 0) //This denotes a new key has been made, then takes chunk of recently made key
 		{
-			RotWord(tmp, count);
+			expHelp(tmp, count);
 			count += 1;
 			NrGenKeys += 1;
 		}
@@ -147,131 +149,57 @@ void KeyExpansion(string Password) //Generates all keys that will be used and st
 
 }
 
-void aesEncrypt(string GlobalFile, string paddedmsg, int repeat) 
+void aesEncrypt(string GlobalFile, string paddedmsg, int repeat, unsigned char * key) 
 {
 	string block;
 	int start;
 	int filelength = paddedmsg.length();
-	cout << filelength << endl;
-//	for (int i = 0; i < filelength; i++) {
-//		cout << paddedmsg[i];
-//	}
-	cout << repeat;
+
 	for (int i = 0; i < repeat; i++) {
 
 		start = 16 * i;
-		//cout << start;
-		//cin.get();
 
+		//block += paddedmsg;
 		for (int j = start; j < start + 16; j++) {
 
-			block[j] = paddedmsg[j];
-			cout << paddedmsg[j];
+			block += paddedmsg[j];
 		}
 
+		AddRoundKey(block, key, 0);
+		SubBytes(block);
+		ShiftRows(block);
+		MixColumns(block);
 
-		for (int rounds = 0; rounds < 10; rounds++)
+		for (int rounds = 1; rounds < 10; rounds++)
 		{
 
 			if (rounds < 9) {
 				SubBytes(block);
 				ShiftRows(block);
 				MixColumns(block);
-				AddRoundKey(block);
+				AddRoundKey(block, key, rounds);
 			}
 			if (rounds == 9) {
 				SubBytes(block);
 				ShiftRows(block);
-				AddRoundKey(block);
+				AddRoundKey(block,key, rounds);
 			}
 		}
-//		cout << endl;
-//		cout << endl;
-//		for (int k = start; k < start + 16; k++) {
-//			GlobalFile[k] = block[k];
-//			cout << GlobalFile[k];}
+
 		GlobalFile += block;
 		
-
+		block = "";
 	}
 	writetoFile(GlobalFile, filelength);
 
 }
 
-/*char* padMessage(string File)
-{
-	int fileLen = File.length();			// Get the length of the text file. 
-	int remainder = fileLen % 16;			// This 128 bit encryption requires 16 byte blocks
-	int pad;								// Integer that will populate the padding
-	//int repeat;
-	int padmsglen = 0;
-	char * newmsg;
-	cout << " File length :" << fileLen << endl;
-	cout << "Remainder: " << remainder << endl;
-	pad = 16 - remainder;;				// determine size and content
-	cout <<"pad "<< pad << endl;
-	cin.get();
 
-	if (remainder == 0) {
-
-		padmsglen = fileLen;
-
-	}
-	else {
-
-		padmsglen = fileLen + pad ;		// of the padding
-		cout << "padded message length inside funct: " << padmsglen << endl;
-	}
-
-	 newmsg = new char[padmsglen];	// Dynamically allocate size of the new string
-
-	cout << "padmsglen " << padmsglen << endl;
-	cout << "strlen " << strlen(newmsg) << endl;
-	//for (int x = 0; x < strlen(newmsg); x++) {
-		//cout << newmsg[x] << x << endl;
-	//}
-
-	ofstream myfile;						// output of the file for testing purposes
-	myfile.open("testpad.txt");
-	if (remainder == 0) {
-
-		for (int i = 0; i < fileLen; i++) {	// copy contents
-
-			newmsg[i] = File[i];
-			//cout << paddedmsg[i];
-			myfile << newmsg[i];
-
-		}
-
-	}
-	else {
-
-		for (int i = 0; i < fileLen; i++) {	// copy contents
-
-			newmsg[i] = File[i];
-			//cout << paddedmsg[i];
-			myfile << newmsg[i];
-
-		}
-		for (int j = fileLen; j < padmsglen; j++) {// add padding
-
-			newmsg[j] = (pad);
-			//cout << paddedmsg[j];
-			myfile << newmsg[j];
-
-		}
-
-	}
-	cout << "padded msg len outside for loop: " << strlen(newmsg) << endl;
-	//repeat = padmsglen / 16;
-	//for (int i = 0; i < padmsglen; i++) {
-	//	cout << paddedmsg[i];
-	//}
-	myfile.close();
-	return newmsg;
-}*/
 int main()
 {
+	//Array to hold all generated keys, 128 bits per key
+	unsigned char GeneratedKeys[176];
+
 	string Password;
 	string FileName;
 	string FileContents;
@@ -294,31 +222,17 @@ int main()
 	}
 
 	getline(MyFile, FileContents, '\0');
-	//cout << FileContents << endl;
-	//paddedmsg = padMessage(FileContents);
-	//repeat = (strlen(paddedmsg)) / 16;
-	//cout << "repeat: " << repeat << endl;
-	//cout << "Padded string length: " << strlen(paddedmsg) - 14 << endl;
-	//cin.get();
-	//cin.get();
-	//for (int i = 0; i < strlen(paddedmsg); i++) {
-	//	cout << paddedmsg[i];
-	//}
-
-	// This space below is the changes for the pad message function
-	//
-	//
 
 	if (FileContents.length() % 16 != 0) {
 		int fileLen = FileContents.length();			// Get the length of the text file. 
 		int remainder = fileLen % 16;			// This 128 bit encryption requires 16 byte blocks
 		int pad = 16 - remainder;								// Integer that will populate the padding
-
+		cout << pad << endl;
 		int padmsglen = fileLen + pad;
 
 		for (int i = fileLen; i < padmsglen; i++) {
 		
-			paddedmsg += (pad);
+			paddedmsg += pad;
 		}
 
 		FileContents += paddedmsg;
@@ -326,8 +240,8 @@ int main()
 	}
 
 	repeat = FileContents.length()/ 16;
-
-	aesEncrypt(globalFile,FileContents,repeat);
+	KeyExpansion(GeneratedKeys, Password);
+	aesEncrypt(globalFile,FileContents,repeat, GeneratedKeys);
 
 	MyFile.close();
 
